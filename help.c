@@ -1,31 +1,28 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *add(char *stack, char *buffer)
-{
-    size_t stack_len = stack ? strlen(stack) : 0;
-    size_t buffer_len = strlen(buffer);
-    char *new = malloc(stack_len + buffer_len + 1);
+//the current line stack and buffer contents do a fusion dance
+char *add(char *stack, char *buffer) {
+    size_t len1 = stack ? strlen(stack) : 0;
+    size_t len2 = strlen(buffer);
 
-    if (!new)
+    char *combined = malloc(len1 + len2 + 1);
+    if (!combined)
         return NULL;
 
-    if (stack)
-    {
-        strcpy(new, stack);
-        free(stack);
-    }
-    else
-    {
-        new[0] = '\0';
+    if (stack) {
+        strcpy(combined, stack);
+        free(stack);  //free the old stack after copy
+    } else {
+        combined[0] = '\0';
     }
 
-    strcat(new, buffer);
-    return new;
+    strcat(combined, buffer);  //add new buffer contents
+    return combined;
 }
 
-char *extract(char *stack)
-{
+//takes the first line from stack \n
+char *extract(char *stack) {
     if (!stack || *stack == '\0')
         return NULL;
 
@@ -33,30 +30,35 @@ char *extract(char *stack)
     while (stack[i] && stack[i] != '\n')
         i++;
 
+    //+1 space for \n or \0
     char *line = malloc(i + 2);
     if (!line)
-        return NULL;
+       return NULL;
 
-    strncpy(line, stack, i + 1);
-    line[i + 1] = '\0';
+       strncpy(line, stack, i + 1);
+       line[i + 1] = '\0';
 
     return line;
 }
 
-char *update(char *stack)
-{
+//update the stack to remove extracted line 
+char *update(char *stack) {
     if (!stack)
         return NULL;
 
     char *newline = strchr(stack, '\n');
-    if (!newline)
-    {
-        free(stack);
+    if (!newline) {
+        free(stack);  //if no newline left, free all
         return NULL;
     }
 
-    char *new = strdup(newline + 1);
-    free(stack);
+    //move past the newline
+    size_t nxt_len = strlen(newline + 1);
+    char *rest = malloc(nxt_len + 1);
+    if (!rest)
+        return NULL;
 
-    return new;
+    strcpy(rest, newline + 1);
+    free(stack);
+    return rest;
 }
